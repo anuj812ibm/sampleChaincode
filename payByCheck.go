@@ -50,6 +50,15 @@ type Transaction struct{
 }
 
 
+type Payment struct{	
+	PayID string `json:"payId"`
+	TimeStamp string `json:"timeStamp"`
+	PayAmt string `json:"payAmt"`
+	Payor string `json:"payor"`
+	Payee string `json:"payee"`
+}
+
+
 // GetMile is for storing retreived Get the total Points
 
 type GetMile struct{	
@@ -117,6 +126,27 @@ func (t *FFP) Init(stub shim.ChaincodeStubInterface, function string, args []str
 	if err != nil {
 		return nil, errors.New("Failed creating ApplicationTable.")
 	}
+	
+	
+	// Check if table already exists
+	_, err = stub.GetTable("Payment")
+	if err == nil {
+		// Table already exists; do not recreate
+		return nil, nil
+	}
+
+	// Create application Table
+	err = stub.CreateTable("Payment", []*shim.ColumnDefinition{
+		&shim.ColumnDefinition{Name: "payId", Type: shim.ColumnDefinition_STRING, Key: true},
+		&shim.ColumnDefinition{Name: "timeStamp", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "payAmt", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "payor", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "payee", Type: shim.ColumnDefinition_STRING, Key: false},
+	})
+	if err != nil {
+		return nil, errors.New("Failed creating ApplicationTable.")
+	}
+		
 		
 	// setting up the users role
 	stub.PutState("user_type1_1", []byte("etihad"))
@@ -172,6 +202,55 @@ if len(args) != 12 {
 				&shim.Column{Value: &shim.Column_String_{String_: createdBy}},
 				&shim.Column{Value: &shim.Column_String_{String_: totalPoint}},
 			}})
+
+		if err != nil {
+			return nil, err 
+		}
+		if !ok && err == nil {
+			return nil, errors.New("Row already exists.")
+		}
+			
+		return nil, nil
+
+}
+
+
+
+func (t *FFP) addPayment(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+if len(args) != 5 {
+			return nil, fmt.Errorf("Incorrect number of arguments. Expecting 5. Got: %d.", len(args))
+		}
+		
+		payId:=args[0]
+		timeStamp:=args[1]
+		payAmt:=args[2]
+		payor:=args[3]
+		payee:=args[4]
+//		
+//		assignerOrg1, err := stub.GetState(args[11])
+//		assignerOrg := string(assignerOrg1)
+//		
+//		createdBy:=assignerOrg
+//		totalPoint:="0"
+//		
+	//	err = stub.CreateTable("Payment", []*shim.ColumnDefinition{
+	//	&shim.ColumnDefinition{Name: "payId", Type: shim.ColumnDefinition_STRING, Key: true},
+	//	&shim.ColumnDefinition{Name: "timeStamp", Type: shim.ColumnDefinition_STRING, Key: false},
+	//	&shim.ColumnDefinition{Name: "payAmt", Type: shim.ColumnDefinition_STRING, Key: false},
+	//	&shim.ColumnDefinition{Name: "payor", Type: shim.ColumnDefinition_STRING, Key: false},
+	//	&shim.ColumnDefinition{Name: "payee", Type: shim.ColumnDefinition_STRING, Key: false},
+
+
+		// Insert a row
+		ok, err := stub.InsertRow("Payment", shim.Row{
+			Columns: []*shim.Column{
+				&shim.Column{Value: &shim.Column_String_{String_: payId}},
+				&shim.Column{Value: &shim.Column_String_{String_: timeStamp}},
+				&shim.Column{Value: &shim.Column_String_{String_: payAmt}},
+				&shim.Column{Value: &shim.Column_String_{String_: payor}},
+				&shim.Column{Value: &shim.Column_String_{String_: payee}},
+		 }})
 
 		if err != nil {
 			return nil, err 
@@ -518,6 +597,54 @@ func (t *FFP) getUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 
 }
 
+// to get the deatils of a user against ffid (for internal testing, irrespective of org)
+func (t *FFP) getPayment(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	if len(args) != 1 {
+		return nil, errors.New("Incorrect number of arguments. Expecting ffId to query")
+	}
+
+	payId := args[0]
+	
+
+	// Get the row pertaining to this ffId
+	var columns []shim.Column
+	col1 := shim.Column{Value: &shim.Column_String_{String_: payId}}
+	columns = append(columns, col1)
+
+	row, err := stub.GetRow("Payment", columns)
+	if err != nil {
+		jsonResp := "{\"Error\":\"Failed to get the data for the application " + payId + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	// GetRows returns empty message if key does not exist
+	if len(row.Columns) == 0 {
+		jsonResp := "{\"Error\":\"Failed to get the data for the application " + payId + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+//payId:=args[0]
+//		timeStamp:=args[1]
+//		payAmt:=args[2]
+//		payor:=args[3]
+//		payee:=args[4]
+	
+	res2E := Payment{}
+	
+	res2E.PayId = row.Columns[0].GetString_()
+	res2E.Timestamp = row.Columns[1].GetString_()
+	res2E.PayAmt = row.Columns[2].GetString_()
+	res2E.Payor = row.Columns[3].GetString_()
+	res2E.Payee = row.Columns[4].GetString_()
+	
+    mapB, _ := json.Marshal(res2E)
+    fmt.Println(string(mapB))
+	
+	return mapB, nil
+
+}
+
+
 
 // verify the user is present or not (for internal testing, irrespective of org)
 func (t *FFP) verifyUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -575,7 +702,11 @@ func (t *FFP) Invoke(stub shim.ChaincodeStubInterface, function string, args []s
 	} else if function == "addDeleteMile" { 
 		t := FFP{}
 		return t.addDeleteMile(stub, args)
+	} else if function == "addPayment" { 
+		t := FFP{}
+		return t.addPayment(stub, args)
 	}
+	
 
 	return nil, errors.New("Invalid invoke function name.")
 
@@ -599,7 +730,11 @@ func (t *FFP) Query(stub shim.ChaincodeStubInterface, function string, args []st
 	}else if function == "verifyUser" { 
 		t := FFP{}
 		return t.verifyUser(stub, args)
+	}else if function == "getPayment" { 
+		t := FFP{}
+		return t.getPayment(stub, args)
 	}
+	
 	
 	return nil, nil
 }
