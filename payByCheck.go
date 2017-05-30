@@ -631,8 +631,8 @@ func (t *FFP) getPayment(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	
 	res2E := Payment{}
 	
-	res2E.PayId = row.Columns[0].GetString_()
-	res2E.Timestamp = row.Columns[1].GetString_()
+	res2E.PayID = row.Columns[0].GetString_()
+	res2E.TimeStamp = row.Columns[1].GetString_()
 	res2E.PayAmt = row.Columns[2].GetString_()
 	res2E.Payor = row.Columns[3].GetString_()
 	res2E.Payee = row.Columns[4].GetString_()
