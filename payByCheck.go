@@ -545,6 +545,58 @@ func (t *FFP) getAllTransaction(stub shim.ChaincodeStubInterface, args []string)
 
 }
 
+//get All transaction against ffid (irrespective of org)
+func (t *FFP) getAllPayments(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	if len(args) != 1 {
+		return nil, errors.New("Incorrect number of arguments. Expecting ffId to query")
+	}
+
+	payId := args[0]
+	//assignerRole := args[1]
+
+	var columns []shim.Column
+
+	rows, err := stub.GetRows("Payment", columns)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve row")
+	}
+	
+	//assignerOrg1, err := stub.GetState(assignerRole)
+	//assignerOrg := string(assignerOrg1)
+	
+		
+	res2E:= []*Payment{}	
+	
+	//PayID string `json:"payId"`
+	//TimeStamp string `json:"timeStamp"`
+	//PayAmt string `json:"payAmt"`
+	//Payor string `json:"payor"`
+	//Payee string `json:"payee"`
+	
+	for row := range rows {		
+		newApp:= new(Payment)
+		newApp.PayID = row.Columns[0].GetString_()
+		newApp.TimeStamp = row.Columns[1].GetString_()
+		newApp.PayAmt = row.Columns[2].GetString_()
+		newApp.Payor = row.Columns[3].GetString_()
+		newApp.Payee = row.Columns[4].GetString_()
+		//newApp.Trxntype = row.Columns[5].GetString_()
+		//newApp.TrxnSubType = row.Columns[6].GetString_()
+		//newApp.Remarks = row.Columns[7].GetString_()
+		
+		if newApp.PayID == payId{
+		res2E=append(res2E,newApp)		
+		}				
+	}
+	
+    mapB, _ := json.Marshal(res2E)
+    fmt.Println(string(mapB))
+	
+	return mapB, nil
+
+}
+
 
 // to get the deatils of a user against ffid (for internal testing, irrespective of org)
 func (t *FFP) getUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -733,6 +785,9 @@ func (t *FFP) Query(stub shim.ChaincodeStubInterface, function string, args []st
 	}else if function == "getPayment" { 
 		t := FFP{}
 		return t.getPayment(stub, args)
+	}else if function == "getAllPayments" { 
+		t := FFP{}
+		return t.getAllPayments(stub, args)
 	}
 	
 	
