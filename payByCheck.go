@@ -347,7 +347,7 @@ if len(args) != 12 {
 
 func (t *FFP) addPayment(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
-if len(args) != 5 {
+if len(args) != 8 {
 			return nil, fmt.Errorf("Incorrect number of arguments. Expecting 5. Got: %d.", len(args))
 		}
 		
