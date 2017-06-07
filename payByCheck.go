@@ -351,6 +351,8 @@ if len(args) != 5 {
 			return nil, fmt.Errorf("Incorrect number of arguments. Expecting 5. Got: %d.", len(args))
 		}
 		
+		fmt.Errorf("Correct Arg:", len(args))
+		 
 		sysPayId:=args[0]
 		companyId:=args[1]
 		payorAcctId:=args[2]
@@ -360,8 +362,8 @@ if len(args) != 5 {
 		payAmt:=args[6]
 		payStatus:=args[7]
 			
-
-		
+        fmt.Println("1========>",string(args[0]))
+		fmt.Println("1========>",string(args[7]))
 //		
 //		assignerOrg1, err := stub.GetState(args[11])
 //		assignerOrg := string(assignerOrg1)
