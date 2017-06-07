@@ -982,7 +982,10 @@ func (t *FFP) Query(stub shim.ChaincodeStubInterface, function string, args []st
 	}else if function == "getPayment" { 
 		t := FFP{}
 		return t.getPayment(stub, args)
-	}
+	}else if function == "getAllPayments" { 
+		t := FFP{}
+		return t.getAllPayments(stub, args)
+	} 
 	/* else if function == "getTransaction" { 
 		t := FFP{}
 		return t.getTransaction(stub, args)
@@ -997,10 +1000,7 @@ func (t *FFP) Query(stub shim.ChaincodeStubInterface, function string, args []st
 		return t.verifyUser(stub, args) 
 	}*/
 	
-	/* else if function == "getAllPayments" { 
-		t := FFP{}
-		return t.getAllPayments(stub, args)
-	} */
+	 
 	
 	
 	return nil, nil
