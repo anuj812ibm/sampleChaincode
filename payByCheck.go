@@ -85,6 +85,7 @@ type Payment struct{
 	 CreatTimeStamp string `json:"creatTimeStamp"`
 	 LstUpdTimeStamp string `json:"lstUpdTimeStamp"`
 	 PayAmt string `json:"payAmt"`
+	 PayStatus string `json:"payStatus"`
 	
 }
 
@@ -237,6 +238,8 @@ func (t *FFP) Init(stub shim.ChaincodeStubInterface, function string, args []str
 		&shim.ColumnDefinition{Name: "creatTimeStamp", Type: shim.ColumnDefinition_STRING, Key: false},
 		&shim.ColumnDefinition{Name: "lstUpdTimeStamp", Type: shim.ColumnDefinition_STRING, Key: false},
 		&shim.ColumnDefinition{Name: "payAmt", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "payStatus", Type: shim.ColumnDefinition_STRING, Key: false},
+		
 	})
 	if err != nil {
 		return nil, errors.New("Failed creating ApplicationTable.")
@@ -355,6 +358,7 @@ if len(args) != 5 {
 		creatTimeStamp:=args[4]
 		lstUpdTimeStamp:=args[5]
 		payAmt:=args[6]
+		payStatus:=args[7]
 			
 
 		
@@ -383,6 +387,7 @@ if len(args) != 5 {
 				&shim.Column{Value: &shim.Column_String_{String_: creatTimeStamp}},
 				&shim.Column{Value: &shim.Column_String_{String_: lstUpdTimeStamp}},
 				&shim.Column{Value: &shim.Column_String_{String_: payAmt}},
+				&shim.Column{Value: &shim.Column_String_{String_: payStatus}},
 		 }})
 
 		if err != nil {
@@ -828,6 +833,7 @@ func (t *FFP) getPayment(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	res2E.CreatTimeStamp = row.Columns[4].GetString_()
 	res2E.LstUpdTimeStamp = row.Columns[5].GetString_()
 	res2E.PayAmt = row.Columns[6].GetString_()
+	res2E.PayStatus = row.Columns[7].GetString_()
 	
     mapB, _ := json.Marshal(res2E)
     fmt.Println(string(mapB))
