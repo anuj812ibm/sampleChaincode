@@ -403,6 +403,65 @@ if len(args) != 8 {
 
 }
 
+
+func (t *FFP) updatePayment(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+if len(args) != 8 {
+			return nil, fmt.Errorf("Incorrect number of arguments. Expecting 5. Got: %d.", len(args))
+		}
+		
+		fmt.Errorf("Correct Arg:", len(args))
+		 
+		sysPayId:=args[0]
+		companyId:=args[1]
+		payorAcctId:=args[2]
+		payeeAccountId:=args[3]
+		creatTimeStamp:=args[4]
+		lstUpdTimeStamp:=args[5]
+		payAmt:=args[6]
+		payStatus:=args[7]
+			
+        fmt.Println("1========>",string(args[0]))
+		fmt.Println("1========>",string(args[7]))
+//		
+//		assignerOrg1, err := stub.GetState(args[11])
+//		assignerOrg := string(assignerOrg1)
+//		
+//		createdBy:=assignerOrg
+//		totalPoint:="0"
+//		
+	//	err = stub.CreateTable("Payment", []*shim.ColumnDefinition{
+	//	&shim.ColumnDefinition{Name: "payId", Type: shim.ColumnDefinition_STRING, Key: true},
+	//	&shim.ColumnDefinition{Name: "timeStamp", Type: shim.ColumnDefinition_STRING, Key: false},
+	//	&shim.ColumnDefinition{Name: "payAmt", Type: shim.ColumnDefinition_STRING, Key: false},
+	//	&shim.ColumnDefinition{Name: "payor", Type: shim.ColumnDefinition_STRING, Key: false},
+	//	&shim.ColumnDefinition{Name: "payee", Type: shim.ColumnDefinition_STRING, Key: false},
+
+
+		// Insert a row
+		ok, err := stub.ReplaceRow("Payment", shim.Row{
+			Columns: []*shim.Column{
+				&shim.Column{Value: &shim.Column_String_{String_: sysPayId}},
+				&shim.Column{Value: &shim.Column_String_{String_: companyId}},
+				&shim.Column{Value: &shim.Column_String_{String_: payorAcctId}},
+				&shim.Column{Value: &shim.Column_String_{String_: payeeAccountId}},
+				&shim.Column{Value: &shim.Column_String_{String_: creatTimeStamp}},
+				&shim.Column{Value: &shim.Column_String_{String_: lstUpdTimeStamp}},
+				&shim.Column{Value: &shim.Column_String_{String_: payAmt}},
+				&shim.Column{Value: &shim.Column_String_{String_: payStatus}},
+		 }})
+
+		if err != nil {
+			return nil, err 
+		}
+		if !ok && err == nil {
+			return nil, errors.New("Row already exists.")
+		}
+			
+		return nil, nil
+
+}
+
 func (t *FFP) getAllPayments(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
 	if len(args) != 1 {
@@ -461,6 +520,68 @@ func (t *FFP) getAllPayments(stub shim.ChaincodeStubInterface, args []string) ([
 	return mapB, nil
 
 }
+
+func (t *FFP) addPayorAccount(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+if len(args) != 9 {
+			return nil, fmt.Errorf("Incorrect number of arguments. Expecting 5. Got: %d.", len(args))
+		}
+		
+		fmt.Errorf("Correct Arg:", len(args))
+		 
+		payorAcctId:=args[0]
+		companyId:=args[1]
+		routingNbr:=args[2]
+		accountNbr:=args[3]
+		nameOnAcct:=args[4]
+		country:=args[5]
+		address:=args[6]
+		accType:=args[7]
+		accStatus:=	args[8]
+        fmt.Println("1========>",string(args[0]))
+		fmt.Println("1========>",string(args[8]))
+//		
+//		assignerOrg1, err := stub.GetState(args[11])
+//		assignerOrg := string(assignerOrg1)
+//		
+//		createdBy:=assignerOrg
+//		totalPoint:="0"
+//		
+	//	err = stub.CreateTable("Payment", []*shim.ColumnDefinition{
+	//	&shim.ColumnDefinition{Name: "payId", Type: shim.ColumnDefinition_STRING, Key: true},
+	//	&shim.ColumnDefinition{Name: "timeStamp", Type: shim.ColumnDefinition_STRING, Key: false},
+	//	&shim.ColumnDefinition{Name: "payAmt", Type: shim.ColumnDefinition_STRING, Key: false},
+	//	&shim.ColumnDefinition{Name: "payor", Type: shim.ColumnDefinition_STRING, Key: false},
+	//	&shim.ColumnDefinition{Name: "payee", Type: shim.ColumnDefinition_STRING, Key: false},
+
+
+		// Insert a row
+		ok, err := stub.InsertRow("PayorAccount", shim.Row{
+			Columns: []*shim.Column{
+				&shim.Column{Value: &shim.Column_String_{String_: payorAcctId}},
+				&shim.Column{Value: &shim.Column_String_{String_: companyId}},
+				&shim.Column{Value: &shim.Column_String_{String_: routingNbr}},
+				&shim.Column{Value: &shim.Column_String_{String_: accountNbr}},
+				&shim.Column{Value: &shim.Column_String_{String_: nameOnAcct}},
+				&shim.Column{Value: &shim.Column_String_{String_: country}},
+				&shim.Column{Value: &shim.Column_String_{String_: address}},
+				&shim.Column{Value: &shim.Column_String_{String_: accType}},
+				&shim.Column{Value: &shim.Column_String_{String_: accStatus}},
+		 }})
+
+		if err != nil {
+			return nil, err 
+		}
+		if !ok && err == nil {
+			return nil, errors.New("Row already exists.")
+		}
+			
+		return nil, nil
+
+}
+
+
+
 
 /* // add or delete points and insert the transaction(irrespective of org)
 func (t *FFP) addDeleteMile(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -959,7 +1080,14 @@ func (t *FFP) Invoke(stub shim.ChaincodeStubInterface, function string, args []s
 	}else if function == "addPayment" { 
 		t := FFP{}
 		return t.addPayment(stub, args)
-	}  
+	}else if function == "addPayorAccount" { 
+		t := FFP{}
+		return t.addPayorAccount(stub, args)
+	}else if function == "updatePayment" { 
+		t := FFP{}
+		return t.updatePayment(stub, args)
+	}   
+	
 	/* else if function == "addDeleteMile" { 
 		t := FFP{}
 		return t.addDeleteMile(stub, args)
