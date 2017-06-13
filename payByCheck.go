@@ -468,6 +468,7 @@ func (t *FFP) getAllPayments(stub shim.ChaincodeStubInterface, args []string) ([
 		return nil, errors.New("Incorrect number of arguments. Expecting ffId to query")
 	}
 
+	
 	payStatus := args[0]
 	fmt.Println("1========>",string(payStatus))
 	//assignerRole := args[1]
@@ -512,6 +513,78 @@ func (t *FFP) getAllPayments(stub shim.ChaincodeStubInterface, args []string) ([
 		if newApp.PayStatus == payStatus{
 		res2E=append(res2E,newApp)		
 		}				
+	}
+	
+    mapB, _ := json.Marshal(res2E)
+    fmt.Println(string(mapB))
+	
+	return mapB, nil
+
+}
+
+
+func (t *FFP) getAllPaymentsFilter(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting ffId to query")
+	}
+
+	filterBy := args[0]
+	filterName := args[1]
+	
+	fmt.Println("1========>",string(filterBy))
+	fmt.Println("1========>",string(filterName))
+	
+	
+	//assignerRole := args[1]
+
+	/* type Payment struct{	
+	 SysPayId string `json:"sysPayId"`
+	 CompanyId string `json:"companyId"`
+	 PayorAcctId string `json:"payorAcctId"`
+	 PayeeAccountId string `json:"payeeAccountId"`	
+	 CreatTimeStamp string `json:"creatTimeStamp"`
+	 LstUpdTimeStamp string `json:"lstUpdTimeStamp"`
+	 PayAmt string `json:"payAmt"`
+	 PayStatus string `json:"payStatus"`
+	
+} */
+
+	
+	var columns []shim.Column
+
+	rows, err := stub.GetRows("Payment", columns)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve row")
+	}
+	
+	//assignerOrg1, err := stub.GetState(assignerRole)
+	//assignerOrg := string(assignerOrg1)
+	
+		
+	res2E:= []*Payment{}	
+	
+	for row := range rows {		
+		newApp:= new(Payment)
+		newApp.SysPayId = row.Columns[0].GetString_()
+		newApp.CompanyId = row.Columns[1].GetString_()
+		newApp.PayorAcctId = row.Columns[2].GetString_()
+		newApp.PayeeAccountId = row.Columns[3].GetString_()
+		newApp.CreatTimeStamp = row.Columns[4].GetString_()
+		newApp.LstUpdTimeStamp = row.Columns[5].GetString_()
+		newApp.PayAmt = row.Columns[6].GetString_()
+		newApp.PayStatus = row.Columns[7].GetString_()
+		
+		if filterBy == "PayStatus"{
+		if newApp.PayStatus == filterName{
+		res2E=append(res2E,newApp)		
+		}				
+		}else if filterBy == "CompID"{
+		if newApp.CompanyId == filterName{
+		res2E=append(res2E,newApp)		
+		}
+}		
+		
 	}
 	
     mapB, _ := json.Marshal(res2E)
@@ -1113,6 +1186,9 @@ func (t *FFP) Query(stub shim.ChaincodeStubInterface, function string, args []st
 	}else if function == "getAllPayments" { 
 		t := FFP{}
 		return t.getAllPayments(stub, args)
+	}else if function == "getAllPaymentsFilter" { 
+		t := FFP{}
+		return t.getAllPaymentsFilter(stub, args)
 	} 
 	/* else if function == "getTransaction" { 
 		t := FFP{}
